@@ -586,6 +586,22 @@ function xmldb_auth_oidc_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025040825.01, 'auth', 'oidc');
     }
 
+    /**
+     * Expand the sid field, since external systems can return longer tokens than 36.
+     * The field is altered to be able to hold 128 characters.
+     */
+    if ($oldversion < 2026070700)
+    {
+        $table = new xmldb_table('auth_oidc_sid');
+        $field = new xmldb_field('sid', XMLDB_TYPE_CHAR, 128, null, XMLDB_NOTNULL, false);
+
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_precision($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2026070700, 'auth', 'oidc');
+    }
+
     return true;
 }
 
